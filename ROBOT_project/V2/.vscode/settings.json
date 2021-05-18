@@ -1,0 +1,9 @@
+{
+    "files.associations": {
+        "pilot.h": "c",
+        "client.h": "c",
+        "server.h": "c",
+        "remoteui.h": "c",
+        "robot.h": "c"
+    }
+}
