@@ -1,5 +1,5 @@
 #
-# Hello Robot C - Makefile du package telco des sources.
+# Hello Robot C - Makefile du package comTelco des sources.
 # @author Arnaud Hincelin
 # Organisation des sources.
 
@@ -7,6 +7,7 @@ SRC = $(wildcard *.c)
 OBJ = $(SRC:.c=.o)
 DEP = $(SRC:.c=.d)
 
+CCFLAGS += -I...
 
 #
 # Règles du Makefile.

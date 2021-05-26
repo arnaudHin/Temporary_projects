@@ -13,8 +13,8 @@
 #include <stdbool.h>
 
 #include "remoteUI.h"
-#include "../util.h"
-#include "../commun.h"
+#include "../../utils.h"
+#include "../../commun.h"
 
 //---------- DEFINE ------------ 
 #define MQ_MSG_COUNT 10
