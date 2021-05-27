@@ -11,8 +11,6 @@
 
 //#include "commun.h"
 
-
-
 //enumeration pour savoir si le robot detecte un obstacle
 typedef enum
 {
@@ -27,14 +25,17 @@ typedef struct
     float luminosity;
 } SensorState;
 
+typedef struct 
+{
+    float speed;
+}Speed;
 
 typedef struct //structure qui va prendre les différents capteurs
 {
-    LightSensor* lightSensor;
-    ContactSensor* contactSensor1;
-    ContactSensor* contactSensor2;
+    LightSensor *lightSensor;
+    ContactSensor *contactSensor1;
+    ContactSensor *contactSensor2;
 } Sensors;
-
 
 // défintion de la structure Robot qui prend les deux moteurs et les sensors
 typedef struct
@@ -44,7 +45,6 @@ typedef struct
     Motor *mD;
     Motor *mG;
 } Robot;
-
 
 //Déclaration des fonction globales
 /**
@@ -75,7 +75,7 @@ extern void Robot_free();
  * @brief return the speed of the robot (positive average of the RIGHT_D's and left's current wheel power) 
  * @return speed of the robot (beetween 0 and 100)
  */
-extern int Robot_getRobotSpeed();
+extern float Robot_getRobotSpeed();
 
 /**
  * Robot_getSensorState
@@ -84,7 +84,6 @@ extern int Robot_getRobotSpeed();
  * @return SensorState
  */
 extern SensorState Robot_getSensorState();
-
 
 /**
  * Robot_setWheelsVelocity
@@ -123,6 +122,5 @@ void robot_consignes(Robot *robot, int roueD, int roueG);
  * \param robot le robot concerné.
  */
 void robot_affiche_informations(Robot *robot);
-
 
 #endif /* ROBOT_H */
