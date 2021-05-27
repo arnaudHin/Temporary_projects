@@ -68,11 +68,5 @@ extern void setEvent(RemoteUI_Event_e * event);
 
 
 
-
-
-
-
-
-
 #endif /* REMOTEUI_H_ */
 

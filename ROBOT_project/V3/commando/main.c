@@ -33,6 +33,7 @@ int main()
 //   Serveur_free();
     FacteurCommando_New();
     FacteurCommando_Start();
+    FacteurCommando_Stop();
 
 
 

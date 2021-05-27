@@ -24,8 +24,7 @@ typedef struct{
 
 
 static FacteurTelco_t * myFacteurTelco;
-static char FacteurTelco_IpAdress[] = "000.000.00.0"; //10 car fin de chaine = retour chariot (\0)
-
+static char FacteurTelco_IpAdress[] = "000.0.0.0"; //10 car fin de chaine = retour chariot (\0)
 
 //PROTOTYPES DE FONCTION STATIQUES
 
@@ -48,7 +47,6 @@ extern void FacteurTelco_New(){
 
     myFacteurTelco->mySocket_client.mon_adresse.sin_family = AF_INET; //adresse de famille intetnet (vs = PF_INET, protocole)
     myFacteurTelco->mySocket_client.mon_adresse.sin_port = htons(PORT_DU_SERVEUR_SOCKET); //convertir le nb de port du serveur au format du réseau
-    myFacteurTelco->mySocket_client.mon_adresse.sin_addr = *( ( struct in_addr*)gethostbyname(FacteurTelco_IpAdress)->h_addr_list[0]); //IP (nom de domaine) auquel on doit se connecter
 
 }
 
@@ -58,6 +56,10 @@ extern uint8_t FacteurTelco_Start(){
     int8_t check = 0;
 
     printf("connexion au serveur %s en cours...\n", FacteurTelco_IpAdress);
+
+    PRINT("IP : %s", FacteurTelco_IpAdress);
+
+    myFacteurTelco->mySocket_client.mon_adresse.sin_addr = *( ( struct in_addr*)gethostbyname(FacteurTelco_IpAdress)->h_addr_list[0]); //IP (nom de domaine) auquel on doit se connecter
 
     check = connect(myFacteurTelco->mySocket_client.mySocketCom, (struct sockaddr*)&myFacteurTelco->mySocket_client.mon_adresse, sizeof(myFacteurTelco->mySocket_client.mon_adresse) ); 
     //demande de connexion auprès du serveur
@@ -74,13 +76,11 @@ extern void FacteurTelco_Stop(){
 
     check = close(myFacteurTelco->mySocket_client.mySocketCom);
     STOP_ON_ERROR(check == SOCKET_ERROR);
-
 }
 
 extern void FacteurTelco_SetIP(char * myIP){
 
-    memcpy(FacteurTelco_IpAdress, myIP, 14);
-
+    strcpy(FacteurTelco_IpAdress, myIP);
 }
 
 

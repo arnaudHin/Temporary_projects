@@ -151,7 +151,11 @@ extern void RemoteUI_New(){
     PRINT("Initialisation de la socket...\n ");
     FacteurTelco_New();
     
+    tcgetattr(STDIN_FILENO, &oldt);
+    newt = oldt;
+    newt.c_lflag &= ~(ICANON);
 
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
 
 }
 
@@ -212,13 +216,13 @@ static void RemoteUI_PerformAction(RemoteUI_Action_e action){
 
         case A_CONNECT:
             RemoteUI_Connection();
-
-            //Réception du message via le dispatcheur
             break;
         case A_DISPLAYSCREEN_ERROR:
+            PRINT("A_DISPLAYSCREEN_ERROR\n");
             ask4displayScreen(ERROR_SCREEN);
             break;
         case A_DISPLAYSCREEN_IDLE:
+            PRINT("A_DISPLAYSCREEN_IDLE\n");
             ask4displayScreen(CONNECT_SCREEN);
             break;
         case A_DISPLAYSCREEN_CONNECTED__SET_TIMER_TO1__SET_INDI:
@@ -231,7 +235,7 @@ static void RemoteUI_PerformAction(RemoteUI_Action_e action){
             break;
         case A_ASK_EVENT_COUNT:
             //Demande via ProxyLogger
-
+            PRINT("A_ASK_EVENT_COUNT \n");
             //Reception via Dispatcheur
             Msg.data.event = E_INDI_OK;
             RemoteUI_mqSend(&Msg);
@@ -239,6 +243,7 @@ static void RemoteUI_PerformAction(RemoteUI_Action_e action){
             break;
         case A_ASK_EVENT:
             //Demande via ProxyLogger
+            PRINT("A_ASK_EVENT\n");
 
             //Reception via Dispatcheur
             Msg.data.event = E_EVENT_OK;
@@ -246,6 +251,8 @@ static void RemoteUI_PerformAction(RemoteUI_Action_e action){
 
             break;
         case A_TRANSLATE_VEL__SET_VEL:
+            PRINT("A_TRANSLATE_VEL__SET_VEL\n");
+
             break;
         case A_ESTOP:
             
@@ -304,56 +311,106 @@ static bool RemoteUI_mqSend(RemoteUI_MqMessage_u * message){
 
 static void ask4displayScreen(RemoteUI_Screen_e screen){
 
-    char a;
+    char a = 0;
     RemoteUI_MqMessage_u myMsg;
 
     switch (screen)
     {
         case CONNECT_SCREEN:
             displayScreen(CONNECT_SCREEN);
-            a = getchar();
-
-            printf("char chosir : %c", a);
-
-            switch (a)
-            {
-
-                case 'c':
-                    myMsg.data.event = E_SET_IP;
-                    RemoteUI_mqSend(&myMsg); 
-                    break;
-                case 'q':
-                    myMsg.data.event = E_QUIT;
-                    RemoteUI_mqSend(&myMsg);
-                    break;
-                default:
-                    break; 
-            }
-            
+         
             break;
         case ERROR_SCREEN:
 
-            /* code */
+            displayScreen(ERROR_SCREEN);
 
             break;
         case CONNECTED_SCREEN:
             displayScreen(CONNECTED_SCREEN);
 
-            a = getchar();
-            switch (a)
-            {
-
-                case 'q':
-                    myMsg.data.event = E_QUIT;
-                    RemoteUI_mqSend(&myMsg);
-                    break;
-                default:
-                    break;
-            }
-
             break;
         default:
             break;
+    }
+
+
+    read(STDIN_FILENO, &a, 1);
+
+    switch (screen)
+    {
+    case CONNECT_SCREEN:
+        
+        switch (a){
+
+            case 'c':
+                myMsg.data.event = E_SET_IP;
+                RemoteUI_mqSend(&myMsg); 
+                break;
+            case 'q':
+                myMsg.data.event = E_QUIT;
+                RemoteUI_mqSend(&myMsg);
+                break;
+            default:
+                break; 
+        }
+        break;
+    
+
+    case ERROR_SCREEN:
+        
+        switch (a)
+        {
+            case 'v':
+                PRINT("a = %c\n", a);
+                myMsg.data.event = E_VALIDATE;
+                RemoteUI_mqSend(&myMsg);
+                break;
+        
+            default:
+                break;
+        }
+        break;
+
+
+    case CONNECTED_SCREEN:
+        
+        switch (a)
+        {
+            case 'z':
+                myMsg.data.event = E_SET_DIR;
+                RemoteUI_mqSend(&myMsg);
+                break;
+
+            case 's':
+                myMsg.data.event = E_SET_DIR;
+                RemoteUI_mqSend(&myMsg);
+                break;
+
+            case 'd':
+                myMsg.data.event = E_SET_DIR;
+                RemoteUI_mqSend(&myMsg);
+                break;
+            case 'q':
+                myMsg.data.event = E_SET_DIR;
+                RemoteUI_mqSend(&myMsg);
+                break;
+            case 'a':
+                myMsg.data.event = E_SET_DIR;
+                RemoteUI_mqSend(&myMsg);
+                break;
+            case 'w':
+                myMsg.data.event = E_QUIT;
+                RemoteUI_mqSend(&myMsg);
+                break;
+
+
+            default:
+                break;
+        }
+        break;
+
+    default:
+        break;
     }
 
 
@@ -363,10 +420,10 @@ static void ask4displayScreen(RemoteUI_Screen_e screen){
 
 static void setIp(){
 
-    PRINT("Entrer l'adresse IP sans mettre les . de séparation \n");
+    PRINT("Entrer l'adresse IP \n");
     PRINT("Adresse IP : ");
 
-    char buf[20];
+    char buf[9];
     scanf("%s",buf);
     
     FacteurTelco_SetIP(buf);
