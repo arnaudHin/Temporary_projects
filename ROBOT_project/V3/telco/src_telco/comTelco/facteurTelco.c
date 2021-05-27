@@ -14,8 +14,8 @@
 #include <errno.h>
 #include <string.h>
 
-#include "../../commun.h"
-#include "../../utils.h"
+#include "../../../commun.h"
+#include "../../../utils.h"
 
 
 typedef struct{
@@ -24,7 +24,7 @@ typedef struct{
 
 
 static FacteurTelco_t * myFacteurTelco;
-static char FacteurTelco_IpAdress[] = "000.1.0.0"; //10 car fin de chaine = retour chariot (\0)
+static char FacteurTelco_IpAdress[] = "000.000.00.0"; //10 car fin de chaine = retour chariot (\0)
 
 
 //PROTOTYPES DE FONCTION STATIQUES
@@ -53,7 +53,7 @@ extern void FacteurTelco_New(){
 }
 
 
-extern void FacteurTelco_Start(){
+extern uint8_t FacteurTelco_Start(){
 
     int8_t check = 0;
 
@@ -61,8 +61,10 @@ extern void FacteurTelco_Start(){
 
     check = connect(myFacteurTelco->mySocket_client.mySocketCom, (struct sockaddr*)&myFacteurTelco->mySocket_client.mon_adresse, sizeof(myFacteurTelco->mySocket_client.mon_adresse) ); 
     //demande de connexion auprès du serveur
-    STOP_ON_ERROR( check == SOCKET_ERROR);
-    printf("Connexion au serveur réussie\n"); //succès de connexion au serveur
+    if( check == SOCKET_ERROR){
+        return 1;
+    }
+    return 0;
 }
 
 
@@ -77,7 +79,7 @@ extern void FacteurTelco_Stop(){
 
 extern void FacteurTelco_SetIP(char * myIP){
 
-    memcpy(FacteurTelco_IpAdress, myIP, 10);
+    memcpy(FacteurTelco_IpAdress, myIP, 14);
 
 }
 
