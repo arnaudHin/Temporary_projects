@@ -1,4 +1,7 @@
-
+/**
+ * Autor : Arnaud Hincelin
+ * File : display.c
+ */
 
 
 #include<stdio.h>
@@ -15,39 +18,32 @@
 #include "../../commun.h"
 
 
-
-static struct termios oldt, newt;
-
-
-
-
-
 extern void displayScreen(RemoteUI_Screen_e screen){
 
-    tcgetattr(STDIN_FILENO, &oldt);
-    newt = oldt;
-    newt.c_lflag &= ~(ICANON);
-
-    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
 
     switch (screen)
     {
     case CONNECT_SCREEN:
-        printf("\033[2J\033[;H");
-        printf("\n|_______________ECRAN DE CONNEXION_______________|\n");
-        printf("1. Taper c : Choisir une adresse IP\n");
-        printf("2. Taper q : Quitter\n");
+        PRINT("\033[2J\033[;H");
+        PRINT("\n|_______________ECRAN DE CONNEXION_______________|\n");
+        PRINT("1. Taper c : Choisir une adresse IP\n");
+        PRINT("2. Taper q : Quitter\n");
         
         break;
     case ERROR_SCREEN:
-        printf("\033[2J\033[;H");
-        printf("\n|_______________ECRAN ERROR_______________|\n");
-        printf("1. Taper a : Valider et revenir à écran de connexion\n");
+        PRINT("\033[2J\033[;H");
+        PRINT("\n|_______________ECRAN ERROR_______________|\n");
+        PRINT("1. Taper v : Valider et revenir à écran de connexion\n");
         break;
     case CONNECTED_SCREEN:
-        printf("\033[2J\033[;H");
-        printf("\n|_______________ECRAN CONNECTE_______________|\n");
-        printf("2. Taper q : Quitter\n");
+        PRINT("\033[2J\033[;H");
+        PRINT("\n|_______________ECRAN CONNECTE_______________|\n");
+        PRINT("1. Taper z : Avancer\n");
+        PRINT("2. Taper s : Reculer\n");
+        PRINT("3. Taper d : Tourner à droite\n");
+        PRINT("4. Taper q : Tourner à gauche\n");
+        PRINT("5. Taper s : Stopper\n");
+        PRINT("6. Taper w : Quitter\n");
 
         break;
     default:

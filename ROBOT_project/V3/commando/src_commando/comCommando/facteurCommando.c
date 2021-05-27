@@ -45,9 +45,7 @@ extern void FacteurCommando_New(){
     }
     
     myFacteurCommando->mySocket_serveur.mon_adresse.sin_addr.s_addr = htonl(INADDR_ANY); // serveur => accepte n'importe quelle adresse
-
     myFacteurCommando->mySocket_serveur.mon_adresse.sin_family = AF_INET; //adresse de famille internet
-
     myFacteurCommando->mySocket_serveur.mon_adresse.sin_port = htons(PORT_DU_SERVEUR_SOCKET); // port d'écoute du serveur
 
     errno = 0;
@@ -64,7 +62,6 @@ extern void FacteurCommando_New(){
 
 
 extern uint8_t FacteurCommando_Start(){
-
 
     int listen_erro = listen(myFacteurCommando->mySocket_serveur.mySocketListen, MAX_PENDING_CONNECTIONS);
 
@@ -85,11 +82,33 @@ extern uint8_t FacteurCommando_Start(){
 
     printf("Télécommande correctement connecté\n");   
 
+    listen_erro = close(myFacteurCommando->mySocket_serveur.mySocketListen);
+
+     if( listen_erro == SOCKET_ERROR){
+    perror("close socketListen() ");
+    exit(EXIT_FAILURE);  
+    }
+
 }
 
 
 extern void FacteurCommando_Stop(){
 
+    while (1)
+    {
+        
+    }
+    
+
+
+    errno = 0;
+
+    int closeSocket_erro = close(myFacteurCommando->mySocket_serveur.mySocketCom);
+
+    if ( closeSocket_erro == SOCKET_ERROR){
+        perror("close socketCom() ");
+        exit(EXIT_FAILURE);    
+    }
 
 }
 
