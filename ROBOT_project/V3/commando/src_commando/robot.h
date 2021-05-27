@@ -1,10 +1,14 @@
+
 //Nathan Brient
+
 #ifndef ROBOT_H
 #define ROBOT_H
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "prose.h" //va inclure motors.h, contact_sensors.h ...
+//#include "../../infox_prose-x86_64-v0.3/include/infox/prose/motors.h" //va inclure motors.h, contact_sensors.h ...
+#include "prose.h"
+
 //#include "commun.h"
 
 
