@@ -37,7 +37,7 @@ typedef enum
 typedef enum
 {
   S_FORGET = 0,
-  S_MAIN_SCREEN,
+  S_MAIN_SCREEN, 
   S_LOG_SREEN,
   S_DEATH,
   S_WAIT_NUMBER_EVENTS,
@@ -49,16 +49,16 @@ typedef enum
 //Definition des actions possibles
 typedef enum
 {
-  A_AUI_NOP = 0,
-  A_AUI_STOP_MAIN,
-  A_AUI_STOP_LOG,
-  A_AUI_TES,
+  A_AUI_NOP = 0,//Ne rien faire
+  A_AUI_STOP_MAIN,//Arrêter le main
+  A_AUI_STOP_LOG,//Arrêter les logs
+  A_AUI_TES,//ToggleEmergencyStop
   A_AUI_ASK_EVENTS_COUNT,
-  A_AUI_CLEAR_LOG,
+  A_AUI_CLEAR_LOG,//Effacer logs
   A_AUI_SET_EVENTS_COUNT,
   A_AUI_SET_EVENTS,
-  A_AUI_BACK_MAIN,
-  A_AUI_GO_SLOG,
+  A_AUI_BACK_MAIN,//Revenir au main screen
+  A_AUI_GO_SLOG,//Aller au log screen
   NB_ACTION
 } Action;
 
@@ -66,12 +66,12 @@ typedef enum
 typedef enum
 {
   E_AUI_STOP = 0,
-  E_AUI_QUIT,
-  E_AUI_TES,
-  E_AUI_CLEAR_LOG,
-  E_AUI_BACK_MS,
-  E_AUI_GO_SLOG,
-  E_AUI_TIME_OUT,
+  E_AUI_QUIT,//Quitter
+  E_AUI_TES,//Faire toggleEmergencyStop
+  E_AUI_CLEAR_LOG,//Effacer log
+  E_AUI_BACK_MS,//Revenir au main screen
+  E_AUI_GO_SLOG,//Aller au screen log
+  E_AUI_TIME_OUT,//Time out du timer
   E_AUI_SET_EVENTS_COUNT,
   E_AUI_SET_EVENTS,
   NB_EVENT
@@ -94,7 +94,7 @@ static Transition transition[NB_STATE][NB_EVENT] =
         [S_LOG_SREEN][E_AUI_CLEAR_LOG] = {S_LOG_SREEN, A_AUI_CLEAR_LOG},
         [S_LOG_SREEN][E_AUI_TES] = {S_LOG_SREEN, A_AUI_TES},
         [S_LOG_SREEN][E_AUI_STOP] = {S_DEATH, A_AUI_STOP_LOG},
-        [S_LOG_SREEN][E_AUI_TIME_OUT] = {S_WAIT_NUMBER_EVENTS, A_AUI_BACK_MAIN},
+        [S_LOG_SREEN][E_AUI_TIME_OUT] = {S_MAIN_SCREEN, A_AUI_BACK_MAIN},
         [S_LOG_SREEN][E_AUI_BACK_MS] = {S_MAIN_SCREEN, A_AUI_BACK_MAIN},
         [S_WAIT_EVENTS][E_AUI_SET_EVENTS_COUNT] = {S_WAIT_EVENTS, A_AUI_SET_EVENTS_COUNT},
         [S_WAIT_EVENTS][E_AUI_SET_EVENTS] = {S_LOG_SREEN, A_AUI_SET_EVENTS},
@@ -422,3 +422,19 @@ static askMvt(Direction direction)
   vel.dir = direction;
   Pilot_setVelocity(vel);
 }
+
+/**
+int main(int argc, char *argv[])
+{
+
+  int keepGoing = 1;
+
+  while (keepGoing)
+  {
+    AdminUI_new();
+    AdminUI_start();
+    keepGoing = 0;
+  }
+
+  return 0;
+}**/
