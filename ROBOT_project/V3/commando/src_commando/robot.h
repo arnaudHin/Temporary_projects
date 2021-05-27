@@ -8,27 +8,14 @@
 
 //#include "../../infox_prose-x86_64-v0.3/include/infox/prose/motors.h" //va inclure motors.h, contact_sensors.h ...
 #include "prose.h"
-
+#include "../../commun.h"
 //#include "commun.h"
 
 //enumeration pour savoir si le robot detecte un obstacle
-typedef enum
-{
-    NO_BUMP = 0,
-    BUMPED
-} Collision;
+
 
 /** the captor's states of the robot (bumper and luminosity) */
-typedef struct
-{
-    Collision collision;
-    float luminosity;
-} SensorState;
 
-typedef struct 
-{
-    float speed;
-}Speed;
 
 typedef struct //structure qui va prendre les différents capteurs
 {

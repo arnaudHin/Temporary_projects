@@ -63,12 +63,16 @@ static void appendEvent(SensorState ss, Speed sp)
     compt += compt;
 }
 
+
 /////////////////////////////////////////////////////////////////////////////////////////////
 ////                                                                                     ////
 ////                                   PUBLIC FUNCTIONS                                  ////
 ////                                                                                     ////
 /////////////////////////////////////////////////////////////////////////////////////////////
 
+static void wdExpires(){
+    
+}
 extern void startPolling()
 {
     int8_t check;

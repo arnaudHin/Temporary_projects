@@ -13,7 +13,7 @@
 #include <mqueue.h>
 #include "adminUI.h"
 #include "pilot.h"
-
+#include "logger.h"
 
 #define MAX_LIST (200)
 
@@ -261,7 +261,7 @@ extern void setEventsCount(int eventCount){
 }
 
 static void updateEvents(){
-  AskEvents();
+  askEvents();
 };
 
 static void setTimer()
@@ -345,7 +345,7 @@ static void performAction(Action action)
     toggleES();
     break;
   case A_AUI_CLEAR_LOG:
-    Logger_clearEvents();
+    clearEvents();
     previousEventNumber = 0;
     currentEventNumber = 0;
     break;

@@ -176,11 +176,6 @@ typedef union
  */
 static void mqReceive(MqMsg *aMsg);
 
-/**
- * @brief toggleES function
- * 
- */
-static void toggleES();
 
 /**
  * @brief signalES()
@@ -424,23 +419,7 @@ static void actionNoRunToNoRun()
 static void actionCheck()
 {
 }
-static void toggleES()
-{
-    MqMsg msg = {.data.event = TOGGLEES_E};
-    TRACE("TOGGLEES_E\n");
-    if (emergency == true)
-    {
-        signalES(false);
-    }
-    else
-    {
-        signalES(true);
-        currentVel.dir= STOP_D;
-        sendMvt(currentVel);
-        cancel(wat);
-    }
-    mqSend(&msg);
-}
+
 static void setRobotVelocity(VelocityVector vel)
 {
     MqMsg msg = {.data.event = SET_ROBOT_VEL_E};
@@ -670,7 +649,23 @@ void sendMvt(VelocityVector vector)
         }
     }
 }
-
+extern void toggleES()
+{
+    MqMsg msg = {.data.event = TOGGLEES_E};
+    TRACE("TOGGLEES_E\n");
+    if (emergency == true)
+    {
+        signalES(false);
+    }
+    else
+    {
+        signalES(true);
+        currentVel.dir= STOP_D;
+        sendMvt(currentVel);
+        cancel(wat);
+    }
+    mqSend(&msg);
+}
 //stopper le robot
 void Pilot_stop()
 {
