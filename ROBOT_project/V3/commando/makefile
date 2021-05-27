@@ -4,7 +4,7 @@
 # Organisation des sources.
 
 # Compilateur.
-
+INTOXDIR = $(realpath ../infox_prose-x86_64-v0.3/)
 export CC = gcc
 
 # options de compilation
@@ -15,8 +15,14 @@ export CCFLAGS += -D_BSD_SOURCE -D_XOPEN_SOURCE_EXTENDED -D_XOPEN_SOURCE -D_DEFA
 export CCFLAGS += -std=c99 -Wall -Wextra
 export LDFLAGS += -lrt -pthread
 
+# options de compilation pour l'utilisation de Intox/Infox
+export CCFLAGS += -DINTOX
+export CCFLAGS += -I$(INTOXDIR)/include/infox/prose/
+export LDFLAGS += -L$(INTOXDIR)/lib/ -linfox
+
 # Un niveau de package est accessible.
-SRC = $(wildcard src/*.c)
+SRC = $(wildcard src_commando/*.c)
+SRC += $(wildcard src_commando/comCommando/*.c)
 
 # Pour ajouter un second niveau :		
 # SRC += $(wildcard */*/*.c)
@@ -51,7 +57,7 @@ $(EXEC): $(OBJ) $(OBJ_MAIN)
 
 $(OBJ):
 	@echo "----------Compilation--------------"
-	@make -C src
+	@make -C src_commando
 
 $(OBJ_MAIN) : $(MAIN)
 	@$(CC) -c $(CCFLAGS) $(MAIN) -o $(OBJ_MAIN)
@@ -61,7 +67,7 @@ $(OBJ_MAIN) : $(MAIN)
 
 clean:
 	@echo "----------Nettoyage--------------"
-	@(cd src && $(MAKE) $@)
+	@(cd src_commando && $(MAKE) $@)
 	@rm -f $(DEP)
 	@rm -f bin/$(EXEC)
 	@rm -f $(OBJ_MAIN)
