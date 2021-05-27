@@ -135,9 +135,9 @@ SensorState Robot_getSensorState()
  * @brief return the speed of the robot (positive average of the RIGHT_D's and left's current wheel power) 
  * @return speed of the robot (beetween 0 and 100)
  */
-int Robot_getRobotSpeed()
+float Robot_getRobotSpeed()
 {
-	int s = 0;
+	float s = 0;
 	//if (pilot->velocityVector.dir != STOP_D)
 	//{
 	s = (Motor_getCmd(robotInit->mD) + Motor_getCmd(robotInit->mG)) / 2; 
