@@ -17,8 +17,6 @@ export LDFLAGS += -lrt -pthread
 
 # Un niveau de package est accessible.
 SRC = $(wildcard src_telco/*.c)
-
-# Pour ajouter un second niveau :		
 SRC += $(wildcard src_telco/comTelco/*.c)
 
 OBJ = $(SRC:.c=.o)
@@ -40,7 +38,6 @@ CCFLAGS += -I.
 #
 # Règles du Makefile.
 #
-
 
 # Compilation.
 all: $(EXEC)

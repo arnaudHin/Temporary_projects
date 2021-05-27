@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "commun.h": "c",
+        "pilot.h": "c"
+    }
+}
