@@ -12,6 +12,7 @@
 #include <stdbool.h>
 #include <mqueue.h>
 #include "adminUI.h"
+#include "pilot.h"
 
 #define errExit(msg) \
   do                 \
@@ -31,11 +32,7 @@ typedef enum
     STOP
 } Direction;
 
-typedef struct
-{
-    Direction dir;
-    int power;
-} VelocityVector;
+
 //Definition des états possibles
 typedef enum
 {
