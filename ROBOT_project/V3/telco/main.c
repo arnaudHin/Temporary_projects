@@ -17,8 +17,6 @@ int main() {
     RemoteUI_Stop();
     RemoteUI_Free();
 
-
-
     return 0;
 }
 

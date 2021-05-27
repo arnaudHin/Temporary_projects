@@ -133,7 +133,7 @@ Watchdog *Watchdog_construct(uint32_t thisDelay, WatchdogCallback callback)
 
 	//result->timerid1 = timerid;
 
-	printf("L'id du timer est 0x%lx\n", (long)result->timerid1); // On affiche l'id sous forme hexadécimal
+	printf("L'id du timer est 0x%ld\n", (long)result->timerid1); // On affiche l'id sous forme hexadécimal
 	return result;
 }
 
@@ -145,7 +145,7 @@ void Watchdog_start(Watchdog *this)
 	// TODO: starts the POSIX timer
 	//freq_nanosecs = 1000000000;
 	//atoll(); //permet de transformer une chaîne de caratère contenant la représentation textuel d'un entier en un entier très long
-	if (this->myDelay = 250)
+	if (this->myDelay == 250)
 	{
 		its.it_value.tv_nsec = this->myDelay * 1000000;
 	}
@@ -162,14 +162,14 @@ void Watchdog_start(Watchdog *this)
 	if (timer_settime(this->timerid1, 0, &its, NULL) == -1)
 		;				// arme la minuterie indiquée par timerid1 et donne la valeur initial et et le nouvel intervalle / si valeur null, alors déasarmé
 	printf("bnojours"); //errExit("timer_settime");
-	printf("Le delay du timer est de %d \n", (long)this->timerid1);
+	printf("Le delay du timer est de %ld \n", (long)this->timerid1);
 
 	//printf("Dormir pendant %d secondes \n", atoi()); // permet de transformer une chaine de caractère représentant une valeur entière en valeur numérique  de type int
 }
 
 void Watchdog_cancel(Watchdog *this)
 {
-	int error_code;
+	//int error_code;
 	struct itimerspec its;
 	its.it_value.tv_sec = 0;								   // indique le temps restant pour la prochaine expiration
 	printf("L'id du timer est 0x%lx\n", (long)this->timerid1); // On affiche l'id sous forme hexadécimal
@@ -181,7 +181,7 @@ void Watchdog_cancel(Watchdog *this)
 
 void Watchdog_destroy(Watchdog *this)
 {
-	int error_code;
+	//int error_code;
 
 	// TODO: disarms and deletes the POSIX timer
 	timer_delete(this->timerid1); // On détruit le timer

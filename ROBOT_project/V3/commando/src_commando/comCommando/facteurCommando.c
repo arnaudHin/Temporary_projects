@@ -31,7 +31,7 @@ static FacteurCommando_t * myFacteurCommando;
 extern void FacteurCommando_New(){
 
     myFacteurCommando = NULL;
-    int8_t check = 0;
+    //int8_t check = 0;
     errno = 0;
     myFacteurCommando = calloc(1, sizeof(FacteurCommando_t));
     
@@ -61,7 +61,7 @@ extern void FacteurCommando_New(){
 }
 
 
-extern uint8_t FacteurCommando_Start(){
+extern void FacteurCommando_Start(){
 
     int listen_erro = listen(myFacteurCommando->mySocket_serveur.mySocketListen, MAX_PENDING_CONNECTIONS);
 
@@ -98,8 +98,6 @@ extern void FacteurCommando_Stop(){
     {
         
     }
-    
-
 
     errno = 0;
 
@@ -111,6 +109,9 @@ extern void FacteurCommando_Stop(){
     }
 
 }
+
+
+
 
 
 

@@ -9,7 +9,7 @@
 
 
 extern void FacteurCommando_New();
-extern uint8_t FacteurCommando_Start();
+extern void FacteurCommando_Start();
 extern void FacteurCommando_Stop();
 
 

@@ -12,9 +12,6 @@
 #ifndef COMMUN_H
 #define COMMUN_H
 
-#define PORT_DU_SERVEUR (1234)
-#define MAX_PENDING_CONNECTIONS (5)
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>

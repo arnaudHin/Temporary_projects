@@ -176,7 +176,7 @@ extern void RemoteUI_Stop(){
     pthread_join(remoteUI_Thread, NULL);
 
     PRINT("\033[2J\033[;H");
-    PRINT(KNRM"ESEO SE 2020-2021 | Robot V2 |HINCELIN Arnaud\n");
+    PRINT(KNRM"ESEO SE 2020-2021 | Robot V3 |HINCELIN Arnaud BEUTTER Briac LEROUX Adrien\n");
     PRINT("Au revoir !\n");
 
 }
@@ -358,8 +358,7 @@ static void ask4displayScreen(RemoteUI_Screen_e screen){
 
     case ERROR_SCREEN:
         
-        switch (a)
-        {
+        switch (a){
             case 'v':
                 PRINT("a = %c\n", a);
                 myMsg.data.event = E_VALIDATE;
