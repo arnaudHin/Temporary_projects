@@ -1,5 +1,8 @@
 #include <stdio.h>
+#include <src_commando/comCommando/facteurCommando.h>
+
 //#include "./commando/serveur.h"
+
 
 
 
@@ -28,6 +31,10 @@ int main()
 //   Serveur_start();
 //   Serveur_stop();
 //   Serveur_free();
+    FacteurCommando_New();
+    FacteurCommando_Start();
+
+
 
   return 0;
 }

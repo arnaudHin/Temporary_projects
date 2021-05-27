@@ -22,7 +22,9 @@
 
 #define MQ_max (5)
 
-//A supprimer
+
+
+
 typedef enum
 {
     LEFT = 0,
@@ -142,7 +144,7 @@ static void cancelTimer();
 static void destroyTimer();
 static void AdminUI_mqReceive(MqMessage *this);
 static void *run();
-static void performAction(MqMessage MqMessage, Action action);
+static void performAction(Action action);
 static void captureChoice();
 static askMvt(Direction direction);
 
@@ -150,13 +152,14 @@ static askMvt(Direction direction);
 
 extern void AdminUI_new()
 {
+
   struct sigevent sev;
   sev.sigev_notify = SIGEV_THREAD;
   sev.sigev_value.sival_ptr = &timerId;
   sev.sigev_notify_function = timerOut();
   int error_code;
   error_code = timer_create(CLOCK_REALTIME, &sev, &timerId);
-  if (error_code = -1)
+  if (error_code == -1)
   {
     errExit("Timer_create error");
   }
@@ -173,7 +176,6 @@ extern void AdminUI_start()
   attr.mq_msgsize = sizeof(MqMessage);
   attr.mq_curmsgs = 0;
   mq_unlink(BAL);
-  int error_open;
   myMq = mq_open(BAL, O_RDWR | O_CREAT, 0777, &attr);
   if (myMq == -1)
   {
@@ -224,10 +226,11 @@ extern void AdminUI_backMainSreen()
 };
 
 //Méthodes static
-static void *timerOut()
+static void *timerOut(void)
 {
   MqMessage eventMessage = {.event = E_AUI_TIME_OUT};
   mq_send(myMq, (char *)&eventMessage, sizeof(eventMessage), 0);
+  return NULL;
 };
 
 static void displayScreen(ScreenId idScreen)
@@ -314,14 +317,13 @@ static void *run()
     {
       action = transition[myState][mqMessage.event].action;
       myState = transition[myState][mqMessage.event].destination;
-      performAction(mqMessage, action);
+      performAction(action);
     }
   }
 }
 
-static void performAction(MqMessage mqMessage, Action action)
+static void performAction(Action action)
 {
-  MqMessage message = mqMessage;
   switch (action)
   {
   case A_AUI_GO_SLOG:

@@ -56,7 +56,7 @@ $(EXEC): $(OBJ) $(OBJ_MAIN)
 	$(CC) $(CCFLAGS) $(OBJ) $(OBJ_MAIN) -MF $(DEP) -o bin/$(EXEC) $(LDFLAGS)
 
 $(OBJ):
-	@echo "----------Compilation--------------"
+	#@echo "----------Compilation--------------"
 	@make -C src_commando
 
 $(OBJ_MAIN) : $(MAIN)
