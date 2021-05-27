@@ -13,6 +13,7 @@
 #include <mqueue.h>
 #include "adminUI.h"
 #include "pilot.h"
+#include "logger.h"
 
 
 #define MAX_LIST (200)
@@ -261,7 +262,7 @@ extern void setEventsCount(int eventCount){
 }
 
 static void updateEvents(){
-  AskEvents();
+  askEvents();
 };
 
 static void setTimer()
@@ -279,6 +280,8 @@ static void setTimer()
   }
 }
 
+
+//Annuler le timer
 static void cancelTimer()
 {
   struct itimerspec its;
@@ -294,6 +297,7 @@ static void cancelTimer()
   }
 }
 
+//Détruitre le timer
 static void destroyTimer()
 {
   timer_delete(timerId);
@@ -304,6 +308,8 @@ static void AdminUI_mqReceive(MqMessage *this)
   mq_receive(myMq, (char *)this, sizeof(*this), NULL);
 }
 
+
+//Méthode run pour lire les messages de la BAL
 static void *run()
 {
   MqMessage mqMessage;
@@ -325,6 +331,7 @@ static void *run()
   return NULL;
 }
 
+//Appelle les méthodes en fonction de l'action en paramètre
 static void performAction(Action action)
 {
   switch (action)
@@ -345,7 +352,7 @@ static void performAction(Action action)
     toggleES();
     break;
   case A_AUI_CLEAR_LOG:
-    Logger_clearEvents();
+    clearEvents();
     previousEventNumber = 0;
     currentEventNumber = 0;
     break;
@@ -401,27 +408,3 @@ static void captureChoice()
     }
   }
 }
-
-/* static void askMvt(Direction direction)
-{
-  VelocityVector vel;
-  vel.power = 50;
-  vel.dir = direction;
-  Pilot_setVelocity(vel);
-} */
-
-/**
-int main(int argc, char *argv[])
-{
-
-  int keepGoing = 1;
-
-  while (keepGoing)
-  {
-    AdminUI_new();
-    AdminUI_start();
-    keepGoing = 0;
-  }
-
-  return 0;
-}**/

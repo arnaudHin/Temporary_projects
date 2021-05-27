@@ -63,6 +63,7 @@ typedef struct
   Demande demande;
   Direction direction;
 } DesDonnees;
+
 typedef struct
 {
     Collision collision;
