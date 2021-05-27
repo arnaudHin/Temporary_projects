@@ -1,6 +1,5 @@
 
 
-typedef enum ScreenId_t ScreenId;
 
 extern void AdminUI_new();
 
