@@ -1,6 +1,6 @@
 /**
  * Autor : Arnaud Hincelin
- * File : RemoteUI.c
+ * File : remoteUI.c
  */
 
 #include <stdint.h>
@@ -11,10 +11,12 @@
 #include <mqueue.h>
 #include <pthread.h>
 #include <stdbool.h>
+#include <termios.h>
 
 #include "remoteUI.h"
 #include "../../utils.h"
 #include "../../commun.h"
+#include <display.h>
 
 //---------- DEFINE ------------ 
 #define MQ_MSG_COUNT 10
@@ -32,22 +34,6 @@ enum RemoteUI_State{
     NB_STATE
 };
 
-enum RemoteUI_Event{
-    E_NOP=0,
-    E_SET_IP,
-    E_VALIDATE,
-    E_TEST_OK,
-    E_TEST_KO,
-    E_INDI_ZERO,
-    E_INDI_NULL,
-    E_INDI_OK,
-    E_EVENT_NULL,
-    E_EVENT_OK,
-    E_SET_DIR,
-    E_ESTOP,
-    E_QUIT,
-    NB_EVENT
-};
 
 enum RemoteUI_Action{
     A_SET_IP = 0,
@@ -65,27 +51,11 @@ enum RemoteUI_Action{
     NB_ACTION
 };
 
-typedef enum{
-    CONNECT_SCREEN=0,
-    ERROR_SCREEN,
-    CONNECTED_SCREEN,
-    NB_SCREEN
-}RemoteUI_Screen_e;
+
 
 //---------- STRUCT ------------ 
 
-typedef struct{
 
-    RemoteUI_Event_e event;
-
-}RemoteUI_DataMq_t;
-
-typedef union{
-
-    RemoteUI_DataMq_t data;
-    char buffer[sizeof(RemoteUI_DataMq_t)];
-
-}RemoteUI_MqMessage_u;
 
 typedef struct{
     RemoteUI_State_e nextState;
@@ -126,6 +96,7 @@ static RemoteUI_t * myRemoteUI;
 static const char remoteUI_queueName[] = "/myBAL";
 static mqd_t remoteUI_mq;
 static Transition_t * myTransition;
+static struct termios oldt, newt;
 
 static pthread_t remoteUI_Thread;
 
@@ -133,7 +104,7 @@ static pthread_t remoteUI_Thread;
 static void setIp();
 // static void setDir();
 // static void validate();
-static void displayScreen(RemoteUI_Screen_e screen);
+static void ask4displayScreen(RemoteUI_Screen_e screen);
 static bool RemoteUI_Connection();
 
 static bool RemoteUI_mqReceive();
@@ -177,6 +148,7 @@ extern void RemoteUI_New(){
     STOP_ON_ERROR(remoteUI_mq == -1);
 
 
+
 }
 
 
@@ -194,6 +166,11 @@ extern void RemoteUI_Start(){
 
 extern void RemoteUI_Stop(){
     pthread_join(remoteUI_Thread, NULL);
+
+    PRINT("\033[2J\033[;H");
+    PRINT(KNRM"ESEO SE 2020-2021 | Robot V2 |HINCELIN Arnaud\n");
+    PRINT("Au revoir !\n");
+
 }
 
 
@@ -230,24 +207,24 @@ static void RemoteUI_PerformAction(RemoteUI_Action_e action){
             break;
 
         case A_CONNECT:
-            printf("Connexion en cours...\n");
+            PRINT("Connexion en cours...\n");
             //Appel du proxy
             RemoteUI_Connection();
 
             //Réception du message via le dispatcheur
             break;
         case A_DISPLAYSCREEN_ERROR:
-            displayScreen(ERROR_SCREEN);
+            ask4displayScreen(ERROR_SCREEN);
             break;
         case A_DISPLAYSCREEN_IDLE:
-            displayScreen(CONNECT_SCREEN);
+            ask4displayScreen(CONNECT_SCREEN);
             break;
         case A_DISPLAYSCREEN_CONNECTED__SET_TIMER_TO1__SET_INDI:
-            displayScreen(CONNECTED_SCREEN);
+            ask4displayScreen(CONNECTED_SCREEN);
             
             break;
         case A_DISPLAYSCREEN_CONNECTED__SET_TIMER_TO1__SET_INDI__SET_EVENT:
-            displayScreen(CONNECTED_SCREEN);
+            ask4displayScreen(CONNECTED_SCREEN);
             
             break;
         case A_ASK_EVENT_COUNT:
@@ -276,7 +253,7 @@ static void RemoteUI_PerformAction(RemoteUI_Action_e action){
 
             break;
         case A_QUIT:
-            printf("arret en cours...\n");
+            PRINT("arret en cours...\n");
             break;
 
 
@@ -290,13 +267,12 @@ static void * RemoteUI_Run(){
 
     RemoteUI_MqMessage_u myMsg;
 
-    displayScreen(CONNECT_SCREEN);
+    ask4displayScreen(CONNECT_SCREEN);
 
-    
     while (myRemoteUI->myState != S_DEATH)
     {
         RemoteUI_mqReceive(&myMsg);
-        //printf("event recu : %s", myMsg.buffer);
+        //PRINT("event recu : %s", myMsg.buffer);
         myTransition = &tranSyst[myRemoteUI->myState][myMsg.data.event];
         
         RemoteUI_PerformAction(myTransition->actionToDo);
@@ -324,58 +300,74 @@ static bool RemoteUI_mqSend(RemoteUI_MqMessage_u * message){
 }
 
 
-static void displayScreen(RemoteUI_Screen_e screen){
+static void ask4displayScreen(RemoteUI_Screen_e screen){
+
+    char a;
+    RemoteUI_MqMessage_u myMsg;
 
     switch (screen)
     {
-    case CONNECT_SCREEN:
+        case CONNECT_SCREEN:
+            displayScreen(CONNECT_SCREEN);
+            a = getchar();
 
-        printf("\n|_______________ECRAN DE CONNEXION_______________|\n");
-        printf("1. Taper c : Choisir une adresse IP\n");
-        printf("2. Taper q : Quitter\n");
-        char a = getchar();
+            printf("char chosir : %c", a);
 
-        switch (a)
-        {
-            RemoteUI_MqMessage_u myMsg;
+            switch (a)
+            {
 
-            case 'c':
-                myMsg.data.event = E_SET_IP;
-                RemoteUI_mqSend(&myMsg); 
-                break;
-            case 'q':
-                myMsg.data.event = E_QUIT;
-                RemoteUI_mqSend(&myMsg);
-                break;
-            default:
-                break;
-          
-        }
-        
-        break;
-    case ERROR_SCREEN:
-        /* code */
-        break;
-    case CONNECTED_SCREEN:
+                case 'c':
+                    myMsg.data.event = E_SET_IP;
+                    RemoteUI_mqSend(&myMsg); 
+                    break;
+                case 'q':
+                    myMsg.data.event = E_QUIT;
+                    RemoteUI_mqSend(&myMsg);
+                    break;
+                default:
+                    break; 
+            }
+            
+            break;
+        case ERROR_SCREEN:
 
-        printf("\n|_______________ECRAN CONNECTE_______________|\n");
+            /* code */
 
-        break;
-    default:
-        break;
+            break;
+        case CONNECTED_SCREEN:
+            displayScreen(CONNECTED_SCREEN);
+
+            a = getchar();
+            switch (a)
+            {
+
+                case 'q':
+                    myMsg.data.event = E_QUIT;
+                    RemoteUI_mqSend(&myMsg);
+                    break;
+                default:
+                    break;
+            }
+
+            break;
+        default:
+            break;
     }
+
+
+    
 }
 
 
 static void setIp(){
 
-    printf("Entrer l'adresse IP sans mettre les . de séparation \n");
-    printf("Adresse IP : ");
+    PRINT("Entrer l'adresse IP sans mettre les . de séparation \n");
+    PRINT("Adresse IP : ");
 
     char buf[20];
     scanf("%s",buf);
     
-    printf("Enregistrement de l'adresse IP : %s \n", buf);
+    PRINT("Enregistrement de l'adresse IP : %s \n", buf);
 
     RemoteUI_MqMessage_u Msg;
     

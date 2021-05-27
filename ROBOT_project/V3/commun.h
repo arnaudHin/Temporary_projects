@@ -25,6 +25,19 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 
+
+#define SOCKET_ERROR -1
+#define PORT_DU_SERVEUR_SOCKET (12349)
+#define MAX_PENDING_CONNECTIONS (1)
+
+#define CONNEXION_MARCHE 1
+#define CONNEXION_ARRET 0
+
+#define KNRM  "\x1B[0m"
+#define KCYN  "\x1B[36m"
+
+#define FRED  "\x1B[41m"
+#define FBLU  "\x1B[44m"
 //les directions que peut prendre le robot
 typedef enum {STOP_D=0,LEFT_D, RIGHT_D, FORWARD_D, BACKWARD_D} Direction;
 
@@ -44,5 +57,51 @@ typedef struct
   Direction direction;
 } DesDonnees;
 
+typedef struct{
+
+
+
+}MyData_t;
+
+
+typedef struct{
+	  int mySocketListen;
+	  int mySocketCom; 
+    MyData_t myData;
+  	struct sockaddr_in mon_adresse;
+}MySocket_t;
+
+
 
 #endif /* __COMMON_H */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
