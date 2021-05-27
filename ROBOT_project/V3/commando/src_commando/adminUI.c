@@ -219,6 +219,14 @@ extern void AdminUI_backMainSreen()
   mq_send(myMq, (char *)&eventMessage, sizeof(eventMessage), 0);
 };
 
+extern void setEvents(Eventa *events){
+  myEvents[currentEventNumber] = events[currentEventNumber];
+}
+
+extern void setEventsCount(int eventCount){
+  currentEventNumber = eventCount;
+}
+
 
 //Méthodes static
 static void *timerOut(void)
@@ -236,7 +244,7 @@ static void displayScreen(ScreenId idScreen)
     printf("Main Screen : \n\r");
     printf("Voici la liste des commandes : \n \
         'R': Afficher Logs \n \
-        'W': Arrêt urgence \n \
+        'W': Arrêt d'urgence \n \
         'A': Quitter \n\r ");
     captureChoice();
     break;
@@ -244,7 +252,7 @@ static void displayScreen(ScreenId idScreen)
     printf("Log Screen :");
     printf("'E': Effacer Logs \n\
             'B': Retour Main screen \n\
-            'A' : Quitter \n\r");
+            'A': Quitter \n\r");
     captureChoice();
     break;
   default:
@@ -252,13 +260,6 @@ static void displayScreen(ScreenId idScreen)
   }
 };
 
-extern void setEvents(Eventa *events){
-  myEvents[currentEventNumber] = events[currentEventNumber];
-}
-
-extern void setEventsCount(int eventCount){
-  currentEventNumber = eventCount;
-}
 
 static void updateEvents(){
   askEvents();
