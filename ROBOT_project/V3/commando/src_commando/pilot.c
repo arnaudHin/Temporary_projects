@@ -1,6 +1,7 @@
 
 //Projet robot v2 Nathan Brient // V3 Adrien LE ROUX
 #include "../../commun.h"
+#include "../../utils.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -13,6 +14,34 @@
 #include "watchdog.h"
 #include "pilot.h"
 
+/////////////////////////////////////////////////////////////////////////////////////////////
+////                                                                                     ////
+////                                  TYPEDEF & VARIABLES                                ////
+////                                                                                     ////
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * @def MQ_MAX_MESSAGES
+ *
+ * The maximum number of message the queue can handle at one time
+ *
+ * By default, cannot be higher than 10, unless you change this
+ * value into /proc/sys/fs/mqueue/msg_max
+ */
+#define MQ_MAX_MESSAGES 10
+bool bump = 0;
+bool emergency = false;
+PilotState myPilotState;
+VelocityVector currentVel;
+Watchdog *wat;
+static pthread_t myThread;
+static mqd_t myBal;
+static const char queueName[] = "/Balou";
+static Transition *myTrans;
+static State myState = NORMALIDLE_S;
+typedef void (*ActionPtr)();
+
+Pilot *pilot;
 //booléen pour savoir si collision ou non
 
 //décalaration méthodes static
@@ -73,11 +102,27 @@ static const char *eventGetName(int8_t i)
     return eventName[i];
 }
 
+
 /////////////////////////////////////////////////////////////////////////////////////////////
 ////                                                                                     ////
 ////                                  FUNCTIONS PROTOTYPES                               ////
 ////                                                                                     ////
 /////////////////////////////////////////////////////////////////////////////////////////////
+typedef struct
+{
+    Event event;
+    // generic definition to copy events' parameters
+} MqMsgData;
+/**
+ * @brief Enable to send and receive messages without state convertion concern
+ * 
+ */
+typedef union
+{
+    MqMsgData data;
+    char mqBuffer[sizeof(MqMsgData)];
+} MqMsg;
+
 /**
  * @brief To receive a mqMessage
  * 
@@ -206,35 +251,11 @@ static void actionCheck();
  */
 static const ActionPtr actionsTab[NB_ACTION] = {&actionNone, &actionNorIdleToEmerg, &actionNorIdleToNorRun, &actionNoRunToNorIdle,
                                                 &actionNorRunToNoBump, &actionNoRunToEmer, &actionNoBumpToNoRun, &actionEmerToNorIdle, &actionNoRunToNoRun, &actionCheck};
-typedef struct
-{
-    Event event;
-    // generic definition to copy events' parameters
-} MqMsgData;
 
-/**
- * @brief Enable to send and receive messages without state convertion concern
- * 
- */
-typedef union
-{
-    MqMsgData data;
-    char mqBuffer[sizeof(MqMsgData)];
-} MqMsg;
 
-bool bump = 0;
-bool emergency = false;
-PilotState myPilotState;
-VelocityVector currentVel;
-Watchdog *wat;
-static pthread_t myThread;
-static mqd_t myBal;
-static const char queueName[] = "/Balou";
-static Transition *myTrans;
-static State myState = NORMALIDLE_S;
-typedef void (*ActionPtr)();
 
-Pilot *pilot;
+
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 ////                                                                                     ////
@@ -265,11 +286,11 @@ static void transitionFct(MqMsg msg)
 
     TRACE("MAE, events management %s \n", eventGetName(msg.data.event));
 
-    if (myTrans->destinationState != NONE_S)
+    if (myTrans->etatDestination != NONE_S)
     {
         actionsTab[myTrans->action](); //execution of the action
         TRACE("MAE, actions management %s \n", actionGetName(myTrans->action));
-        myState = myTrans->destinationState;
+        myState = myTrans->etatDestination;
         TRACE("MAE, going to state %s \n", stateGetName(myState));
     }
     else
@@ -368,7 +389,7 @@ static void toggleES()
     else
     {
         signalES(true);
-        currentVel = STOP_D;
+        currentVel.dir= STOP_D;
         sendMvt(currentVel);
         cancel(wat);
     }
@@ -380,7 +401,7 @@ static void setRobotVelocity(VelocityVector vel)
     TRACE("TSET_ROBOT_VEL_E\n");
     currentVel = vel;
     sendMvt(currentVel);
-    wat = Watchdog_construct(1, Pilot_setVelocity(vel));
+    wat = Watchdog_construct(1, wdExpires);
     setTimer(wat);
     mqSend(&msg);
 }
@@ -504,7 +525,7 @@ extern void Pilot_new()
     Robot_new();
     currentVel.dir = STOP_D;
     pilot = (Pilot *)calloc(1, sizeof(Pilot));
-    pilot->robot = *robotInit;
+    //pilot->robot = *robotInit;
 
     pilot->pilotState.collision = (int)pilot->robot.sensorsState.collision;
     pilot->pilotState.luminosity = pilot->robot.sensorsState.luminosity;
@@ -526,23 +547,23 @@ void Pilot_start()
     TRACE("Launching\n");
 }
 
-//méthode qui s'executera lorsquon démarrera le pilot
-void run(Event event, VelocityVector vel)
-{
-    printf("je suis dans run dans Pilot\n");
+// //méthode qui s'executera lorsquon démarrera le pilot
+// void run(Event event, VelocityVector vel)
+// {
+//     printf("je suis dans run dans Pilot\n");
 
-    Action action;
-    State state;
-    action = maTransition[pilot->etat][event].action;
-    state = maTransition[pilot->etat][event].etatDestination;
-    if (state != FINAL_S)
-    {
-        pilot->velocityVector = vel;
-        executionAction(action);
-        //pilot->etat = state; //on met a jour l'état //NE PAS LE FAIRE ICI SINON PB QD IDLE
-        printf("on change d'état : %d\n", pilot->etat);
-    }
-}
+//     Action action;
+//     State state;
+//     action = maTransition[pilot->etat][event].action;
+//     state = maTransition[pilot->etat][event].etatDestination;
+//     if (state != FINAL_S)
+//     {
+//         pilot->velocityVector = vel;
+//         executionAction(action);
+//         //pilot->etat = state; //on met a jour l'état //NE PAS LE FAIRE ICI SINON PB QD IDLE
+//         printf("on change d'état : %d\n", pilot->etat);
+//     }
+// }
 
 // //méthode pour stopper le robot
 // void Pilot_idle(){
@@ -610,7 +631,7 @@ void Pilot_stop()
     MqMsg msg = {.data.event = STOP_E};
     TRACE("Stop the tour\n");
     mqSend(&msg);
-    run(STOP_E, pilot->velocityVector);
+    //run(STOP_E, pilot->velocityVector);
 }
 
 //changer la velocité du robot (diration, vitesse)

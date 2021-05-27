@@ -41,7 +41,6 @@ typedef struct
     Motor *mG;
 } Robot;
 
-Robot * robotInit;
 
 //Déclaration des fonction globales
 /**

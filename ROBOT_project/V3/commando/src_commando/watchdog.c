@@ -154,7 +154,7 @@ void Watchdog_start (Watchdog *this)
 
 	if (timer_settime(this->timerid1, 0, &its, NULL) == -1); // arme la minuterie indiquée par timerid1 et donne la valeur initial et et le nouvel intervalle / si valeur null, alors déasarmé
 		printf("bnojours");//errExit("timer_settime");
-	printf("Le delay du timer est de \n", (long) this->timerid1);
+	printf("Le delay du timer est de %d \n", (long) this->timerid1);
 		 
 	
 	//printf("Dormir pendant %d secondes \n", atoi()); // permet de transformer une chaine de caractère représentant une valeur entière en valeur numérique  de type int
