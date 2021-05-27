@@ -22,8 +22,20 @@
 #define MQ_max (5)
 
 //A supprimer
-typedef enum Direction_t Direction;
-typedef enum VelocityVector_t VelocityVector;
+typedef enum
+{
+    LEFT = 0,
+    RIGHT,
+    FORWARD,
+    BACKWARD,
+    STOP
+} Direction;
+
+typedef struct
+{
+    Direction dir;
+    int power;
+} VelocityVector;
 //Definition des états possibles
 typedef enum
 {
@@ -68,6 +80,14 @@ typedef enum
   NB_EVENT
 } Event;
 
+//Structure pour l'état de destination et l'action à faire
+typedef struct
+{
+  State destination;
+  Action action;
+  Event event;
+} Transition;
+
 //Definition des transitions
 static Transition transition[NB_STATE][NB_EVENT] =
     {
@@ -84,18 +104,11 @@ static Transition transition[NB_STATE][NB_EVENT] =
 };
 
 //Definition des écrans possibles
-enum ScreenId
+typedef enum 
 {
   MAIN_SCREEN = 0,
   LOG_SCREEN
-};
-
-//Definition des évènements
-typedef enum
-{
-  E_FORGET = 0,
-  NB_EVENT
-} Event;
+}ScreenId;
 
 // Attributs de AdminUi
 int currentEventNumber;
@@ -113,13 +126,7 @@ static struct mq_attr attr; //On déclare un attribut pour la fonction mq_open q
 //Identifiant du timer
 timer_t timerId;
 
-//Structure pour l'état de destination et l'action à faire
-typedef struct
-{
-  State destination;
-  Action action;
-  Event event;
-} Transition;
+
 
 //Structure pour les messages
 typedef struct
@@ -130,9 +137,9 @@ typedef struct
 char commande;
 int quitter;
 //Prototypes static
-static void timerOut();
+static void *timerOut();
 static void displayScreen(ScreenId idScreen);
-static void updateEvents(){};
+static void updateEvents();
 static void setTimer();
 static void cancelTimer();
 static void destroyTimer();
@@ -220,8 +227,7 @@ extern void AdminUI_backMainSreen()
 };
 
 //Méthodes static
-
-static void timerOut(void)
+static void *timerOut()
 {
   MqMessage eventMessage = {.event = E_AUI_TIME_OUT};
   mq_send(myMq, (char *)&eventMessage, sizeof(eventMessage), 0);
@@ -240,12 +246,14 @@ static void displayScreen(ScreenId idScreen)
         'D': Gauche \n  \
         'W': Stop \n \
         'R': Afficher Logs \n \
-        'E': Effacer Logs \n \
-        'F': Afficher l'état du robot \n \
         'A': Quitter \n\r ");
+    captureChoice();
     break;
   case LOG_SCREEN:
     printf("Log Screen :");
+    printf("'E': Effacer Logs \n\
+            'B': Retour Main screen \n\r");
+    captureChoice();
     break;
   default:
     break;
@@ -314,9 +322,9 @@ static void *run()
   }
 }
 
-static void performAction(MqMessage MqMessage, Action action)
+static void performAction(MqMessage mqMessage, Action action)
 {
-  MqMessage mqMessage = mqMessage;
+  MqMessage message = mqMessage;
   switch (action)
   {
   case A_AUI_GO_SLOG:
@@ -346,13 +354,13 @@ static void performAction(MqMessage MqMessage, Action action)
     Logger_askEventsCount();
     break;
   default:
-    Printf("Problème rencontré");
+    printf("Problème rencontré");
     break;
   }
 }
 
 /*
- * va prendre le choix de l'utilisateur (afficher les logs, faire avancer le robot ...)
+ * va prendre le choix de l'utilisateur
  *
  */
 static void captureChoice()
@@ -360,11 +368,11 @@ static void captureChoice()
   VelocityVector vel;
   while (quitter == 0)
   {
-    printf("je suis dans capture choice dans Admin\n");
+    printf("je suis dans capture choice dans Admin (Main Screen)\n");
     system("stty -icanon min 1 time 0 -echo");
     commande = getchar();
     switch (commande)
-    { //mouvement
+    {
     case 'z':
       printf("CaptureChoice cas forward \n");
       askMvt(FORWARD);
@@ -398,9 +406,13 @@ static void captureChoice()
     case 'a':
       printf("CaptureChoice cas quit \n");
       printf("Déconnexion...\n\r");
-      //quit();
+      AdminUI_quit();
       quitter = 0;
       system("stty icanon echo ");
+      break;
+    case 'b':
+      printf("Back main screen");
+      AdminUI_backMainSreen();
       break;
     }
   }

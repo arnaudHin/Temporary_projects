@@ -17,6 +17,7 @@
 #include "../../utils.h"
 #include "../../commun.h"
 #include <display.h>
+#include <comTelco/facteurTelco.h>
 
 //---------- DEFINE ------------ 
 #define MQ_MSG_COUNT 10
@@ -105,7 +106,7 @@ static void setIp();
 // static void setDir();
 // static void validate();
 static void ask4displayScreen(RemoteUI_Screen_e screen);
-static bool RemoteUI_Connection();
+static void RemoteUI_Connection();
 
 static bool RemoteUI_mqReceive();
 static bool RemoteUI_mqSend();
@@ -147,6 +148,9 @@ extern void RemoteUI_New(){
     remoteUI_mq = mq_open(remoteUI_queueName, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR, &remoteUI_attrQueue);
     STOP_ON_ERROR(remoteUI_mq == -1);
 
+    PRINT("Initialisation de la socket...\n ");
+    FacteurTelco_New();
+    
 
 
 }
@@ -207,8 +211,6 @@ static void RemoteUI_PerformAction(RemoteUI_Action_e action){
             break;
 
         case A_CONNECT:
-            PRINT("Connexion en cours...\n");
-            //Appel du proxy
             RemoteUI_Connection();
 
             //Réception du message via le dispatcheur
@@ -367,7 +369,7 @@ static void setIp(){
     char buf[20];
     scanf("%s",buf);
     
-    PRINT("Enregistrement de l'adresse IP : %s \n", buf);
+    FacteurTelco_SetIP(buf);
 
     RemoteUI_MqMessage_u Msg;
     
@@ -375,17 +377,18 @@ static void setIp(){
     RemoteUI_mqSend(&Msg);
 }
 
-static bool RemoteUI_Connection(){
+static void RemoteUI_Connection(){
 
-    //Envoie via Proxy
-    //...
-    //Réception du message via le dispatcheur
-
+    uint8_t check = FacteurTelco_Start();
     RemoteUI_MqMessage_u Msg;
-    
-    Msg.data.event = E_TEST_OK;
-    RemoteUI_mqSend(&Msg);
 
-    return true;
+    if(check == 0){
+        Msg.data.event = E_TEST_OK;
+    }
+    else{
+        Msg.data.event = E_TEST_KO;
+    }
+
+    RemoteUI_mqSend(&Msg);
 }
 
