@@ -50,7 +50,21 @@ typedef enum
   EFFACER_LOG
 } Demande;
 
+typedef enum
+{
+    NO_BUMP = 0,
+    BUMPED
+} Collision;
 
+typedef struct
+{
+    Collision collision;
+    float luminosity;
+} SensorState;
+typedef struct 
+{
+    float speed;
+}Speed;
 typedef struct
 {
     SensorState sens;
@@ -63,16 +77,9 @@ typedef struct
   Demande demande;
   Direction direction;
 } DesDonnees;
-typedef struct
-{
-    Collision collision;
-    float luminosity;
-} SensorState;
 
-typedef struct 
-{
-    float speed;
-}Speed;
+
+
 typedef struct{
 
 
