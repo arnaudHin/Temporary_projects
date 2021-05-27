@@ -95,7 +95,7 @@ extern PilotState Pilot_getState();
  */
 extern void check();
 
-
+extern void toggleES();
 
 #endif /* PILOT_H */
 

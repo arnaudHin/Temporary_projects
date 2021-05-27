@@ -15,7 +15,6 @@
 #include "pilot.h"
 #include "logger.h"
 
-
 #define MAX_LIST (200)
 
 #define errExit(msg) \
