@@ -373,7 +373,6 @@ static void performAction(Action action)
  */
 static void captureChoice()
 {
-  VelocityVector vel;
   while (quitter == 0)
   {
     printf("AdminUI (Main Screen)\n");
