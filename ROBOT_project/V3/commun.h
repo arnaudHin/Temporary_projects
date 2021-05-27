@@ -50,6 +50,13 @@ typedef enum
   EFFACER_LOG
 } Demande;
 
+
+typedef struct
+{
+    SensorState sens;
+    Speed speed;
+} Eventa;
+
 //structure DesDonnes qui va prendre la demande du client et la direction que doir prendre le robot
 typedef struct
 {

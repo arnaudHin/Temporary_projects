@@ -14,6 +14,9 @@
 #include "adminUI.h"
 #include "pilot.h"
 
+
+#define MAX_LIST (200)
+
 #define errExit(msg) \
   do                 \
   {                  \
@@ -25,14 +28,6 @@
 
 
 
-typedef enum
-{
-    LEFT = 0,
-    RIGHT,
-    FORWARD,
-    BACKWARD,
-    STOP
-} Direction;
 
 
 //Definition des états possibles
@@ -84,7 +79,6 @@ typedef struct
 {
   State destination;
   Action action;
-  Event event;
 } Transition;
 
 //Definition des transitions
@@ -96,7 +90,7 @@ static Transition transition[NB_STATE][NB_EVENT] =
         [S_LOG_SREEN][E_AUI_CLEAR_LOG] = {S_LOG_SREEN, A_AUI_CLEAR_LOG},
         [S_LOG_SREEN][E_AUI_TES] = {S_LOG_SREEN, A_AUI_TES},
         [S_LOG_SREEN][E_AUI_STOP] = {S_DEATH, A_AUI_STOP_LOG},
-        [S_LOG_SREEN][E_AUI_TIME_OUT] = {S_MAIN_SCREEN, A_AUI_BACK_MAIN},
+        [S_LOG_SREEN][E_AUI_TIME_OUT] = {S_LOG_SREEN, A_AUI_ASK_EVENTS_COUNT},
         [S_LOG_SREEN][E_AUI_BACK_MS] = {S_MAIN_SCREEN, A_AUI_BACK_MAIN},
         [S_WAIT_EVENTS][E_AUI_SET_EVENTS_COUNT] = {S_WAIT_EVENTS, A_AUI_SET_EVENTS_COUNT},
         [S_WAIT_EVENTS][E_AUI_SET_EVENTS] = {S_LOG_SREEN, A_AUI_SET_EVENTS},
@@ -119,13 +113,14 @@ static pthread_t myThread;
  * BAL
  */
 static const char BAL[] = "/BALaUI";
-static mqd_t myMq;          //On déclare un descripteur de notre BAL qui permettra de l'ouvrir et de la fermer
-static struct mq_attr attr; //On déclare un attribut pour la fonction mq_open qui est une structure spécifique à la file pour la configurer (cf l.64)
+static mqd_t myMq;          
+static struct mq_attr attr; 
 
 //Identifiant du timer
 timer_t timerId;
 
 
+Eventa myEvents[MAX_LIST];
 
 //Structure pour les messages
 typedef struct
@@ -134,7 +129,7 @@ typedef struct
 } MqMessage;
 
 char commande;
-int quitter;
+int quitter = 1;
 //Prototypes static
 static void *timerOut();
 static void displayScreen(ScreenId idScreen);
@@ -146,7 +141,6 @@ static void AdminUI_mqReceive(MqMessage *this);
 static void *run();
 static void performAction(Action action);
 static void captureChoice();
-static askMvt(Direction direction);
 
 //Méthodes externes
 
@@ -225,6 +219,7 @@ extern void AdminUI_backMainSreen()
   mq_send(myMq, (char *)&eventMessage, sizeof(eventMessage), 0);
 };
 
+
 //Méthodes static
 static void *timerOut(void)
 {
@@ -240,19 +235,16 @@ static void displayScreen(ScreenId idScreen)
   case MAIN_SCREEN:
     printf("Main Screen : \n\r");
     printf("Voici la liste des commandes : \n \
-        'Z': Avancer \n \
-        'S': Reculer \n \
-        'Q': Droite \n \
-        'D': Gauche \n  \
-        'W': Stop \n \
         'R': Afficher Logs \n \
+        'W': Arrêt urgence \n \
         'A': Quitter \n\r ");
     captureChoice();
     break;
   case LOG_SCREEN:
     printf("Log Screen :");
     printf("'E': Effacer Logs \n\
-            'B': Retour Main screen \n\r");
+            'B': Retour Main screen \n\
+            'A' : Quitter \n\r");
     captureChoice();
     break;
   default:
@@ -260,7 +252,17 @@ static void displayScreen(ScreenId idScreen)
   }
 };
 
-static void updateEvents(){};
+extern void setEvents(Eventa *events){
+  myEvents[currentEventNumber] = events[currentEventNumber];
+}
+
+extern void setEventsCount(int eventCount){
+  currentEventNumber = eventCount;
+}
+
+static void updateEvents(){
+  AskEvents();
+};
 
 static void setTimer()
 {
@@ -320,6 +322,7 @@ static void *run()
       performAction(action);
     }
   }
+  return NULL;
 }
 
 static void performAction(Action action)
@@ -339,7 +342,7 @@ static void performAction(Action action)
     AdminUi_stop();
     break;
   case A_AUI_TES:
-    Pilot_toggleES();
+    toggleES();
     break;
   case A_AUI_CLEAR_LOG:
     Logger_clearEvents();
@@ -350,7 +353,7 @@ static void performAction(Action action)
     displayScreen(MAIN_SCREEN);
     break;
   case A_AUI_ASK_EVENTS_COUNT:
-    Logger_askEventsCount();
+    updateEvents();
     break;
   default:
     printf("Problème rencontré");
@@ -367,43 +370,22 @@ static void captureChoice()
   VelocityVector vel;
   while (quitter == 0)
   {
-    printf("je suis dans capture choice dans Admin (Main Screen)\n");
+    printf("AdminUI (Main Screen)\n");
     system("stty -icanon min 1 time 0 -echo");
     commande = getchar();
     switch (commande)
     {
-    case 'z':
-      printf("CaptureChoice cas forward \n");
-      askMvt(FORWARD);
-      break;
-    case 'q':
-      printf("CaptureChoice cas left \n");
-      askMvt(LEFT);
-      break;
-    case 'd':
-      printf("CaptureChoice cas right \n");
-      askMvt(RIGHT);
-      break;
-    case 's':
-      printf("CaptureChoice cas backward \n");
-      askMvt(BACKWARD);
-      break;
-    case 'w':
-      printf("CaptureChoice cas Stop \n");
-      askMvt(STOP);
-      break;
-      //log
     case 'r':
-      printf("CaptureChoice cas ask4log \n");
+      printf("ask4log \n");
       AdminUI_goScreenLog();
       break;
     //effacer Log
     case 'e':
-      printf("CaptureChoice cas askClearLog \n");
+      printf("askClearLog \n");
       AdminUI_clearLog();
       break;
     case 'a':
-      printf("CaptureChoice cas quit \n");
+      printf("quit \n");
       printf("Déconnexion...\n\r");
       AdminUI_quit();
       quitter = 0;
@@ -413,17 +395,20 @@ static void captureChoice()
       printf("Back main screen");
       AdminUI_backMainSreen();
       break;
+    case 'w':
+      AdminUI_toggleEmergencyStop();
+      break;
     }
   }
 }
 
-static askMvt(Direction direction)
+/* static void askMvt(Direction direction)
 {
   VelocityVector vel;
   vel.power = 50;
   vel.dir = direction;
   Pilot_setVelocity(vel);
-}
+} */
 
 /**
 int main(int argc, char *argv[])
