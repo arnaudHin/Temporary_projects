@@ -9,6 +9,7 @@
  * 
  */
 #include <stdbool.h>
+#include "../../commun.h"
 /**
  * @brief startPolling
  * 

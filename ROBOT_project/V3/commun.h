@@ -63,7 +63,16 @@ typedef struct
   Demande demande;
   Direction direction;
 } DesDonnees;
+typedef struct
+{
+    Collision collision;
+    float luminosity;
+} SensorState;
 
+typedef struct 
+{
+    float speed;
+}Speed;
 typedef struct{
 
 

@@ -12,6 +12,7 @@
 #include <unistd.h> // close
 #include "watchdog.h"
 #include "pilot.h"
+#define MQ_MAX_MESSAGES 10
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 ////                                                                                     ////
@@ -74,7 +75,6 @@ Action action;
  * By default, cannot be higher than 10, unless you change this
  * value into /proc/sys/fs/mqueue/msg_max
  */
-#define MQ_MAX_MESSAGES 10
 bool bump = 0;
 bool emergency = false;
 PilotState myPilotState;
